@@ -16,7 +16,7 @@ export function getShoutbox() {
 	supabase
 		.from('shoutbox')
 		.select('*')
-		.order('ctid', { ascending: false })
+		.order('created_at', { ascending: false })
 		.limit(LIMIT)
 		.then((res) => store.set(res.data ?? []));
 
