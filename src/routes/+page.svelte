@@ -26,7 +26,7 @@
 	<h1>Shoutbox</h1>
 	{#if $shoutbox}
 		<div class="shoutbox">
-			{#each $shoutbox as shout}
+			{#each $shoutbox.reverse() as shout}
 				<p>
 					<span class="text-slate-400 mr-3">{time(new Date(shout.created_at))}</span>
 					<a

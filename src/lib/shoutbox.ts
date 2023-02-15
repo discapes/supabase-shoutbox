@@ -16,6 +16,7 @@ export function getShoutbox() {
 	supabase
 		.from('shoutbox')
 		.select('*')
+		.order('ctid', { ascending: false })
 		.limit(LIMIT)
 		.then((res) => store.set(res.data ?? []));
 
@@ -28,7 +29,7 @@ export function getShoutbox() {
 				schema: 'public',
 				table: 'shoutbox'
 			},
-			(payload) => store.update((old) => [...old!.splice(-LIMIT + 1)!, <Message>payload.new])
+			(payload) => store.update((old) => [<Message>payload.new, ...old!.splice(-LIMIT + 1)!])
 		)
 		.subscribe();
 	return store;
