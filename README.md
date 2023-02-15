@@ -1,24 +1,26 @@
 # create-svelte
 
-Firebase rules:
+Supabase procedures
 
 ```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /shoutbox/{document} {
-      allow read: if true;
-      allow create: if
-      	get(/databases/$(database)/documents/users/$(request.auth.uid)).data.login == request.resource.data.username
-   			&& request.resource.data.timestamp == request.time
-   			&& request.resource.data.message is string
-        ;
-    }
-    match /users/{document} {
-      allow read: if request.auth.uid == document;
-    }
-  }
-}
+create or replace function shout(message text)
+returns void
+language sql
+security definer
+as $$
+	insert into shoutbox (sender, message)
+	select raw_user_meta_data -> 'user_name', message
+	from auth.users
+  	where id = auth.uid();
+$$;
+
+create or replace function deleteUser()
+returns void
+language sql
+security definer
+as $$
+   delete from auth.users where id = auth.uid();
+$$;
 ```
 
 ## Developing

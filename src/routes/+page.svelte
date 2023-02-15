@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { oneField } from '$lib/utils';
-
-	import { getShoutbox } from '$lib/shoutbox';
+	import { addToShoutbox, getShoutbox } from '$lib/shoutbox';
 	import type { PageData } from './$types';
 	import DeleteAccount from './DeleteAccount.svelte';
 	import Login from './Login.svelte';
@@ -12,7 +11,7 @@
 
 	async function send(msg: string) {
 		if (!msg.length) return false;
-		// await addToShoutbox(msg, $userData!);
+		await addToShoutbox(msg);
 		return true;
 	}
 
@@ -25,18 +24,17 @@
 
 <div class="center flex flex-col gap-3">
 	<h1>Shoutbox</h1>
-	<pre>{JSON.stringify(data.session, null, 2)}</pre>
 	{#if $shoutbox}
 		<div class="shoutbox">
-			{#each $shoutbox.reverse() as shout}
+			{#each $shoutbox as shout}
 				<p>
-					<span class="text-stone-400 mr-3">{time(shout.timestamp.toDate())}</span>
+					<span class="text-slate-400 mr-3">{time(new Date(shout.created_at))}</span>
 					<a
 						target="_blank noreferrer"
-						href="https://github.com/{shout.username}"
+						href="https://github.com/{shout.sender}"
 						class="font-bold hover:underline"
 					>
-						{shout.username}:
+						{shout.sender}:
 					</a>
 					{shout.message}
 				</p>
@@ -55,7 +53,7 @@
 	{/if}
 	<h1>Account</h1>
 	{#if data.session}
-		Logged in as {data.session}.
+		Logged in as {data.session.user.user_metadata.user_name}.
 		<Logout />
 		<DeleteAccount />
 	{:else}
@@ -68,6 +66,6 @@
 		@apply flex flex-col gap-3;
 	}
 	.shoutbox p {
-		@apply bg-stone-600 p-2;
+		@apply bg-slate-600 p-2;
 	}
 </style>

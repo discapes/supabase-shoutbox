@@ -1,41 +1,41 @@
 import { writable } from 'svelte/store';
-import { db } from '$lib/supabase';
+import { supabase } from '$lib/supabase';
 
 export type Message = {
+	id: number;
 	message: string;
-	username: string;
-	timestamp: Date;
+	sender: string;
+	created_at: Date;
 };
 
 export function getShoutbox() {
-	const store = writable<Message[] | undefined>([
-		{
-			message: 'foobar',
-			username: 'tester',
-			timestamp: new Date()
-		}
-	]);
+	const LIMIT = 10;
 
-	// const q = query(shoutboxCollection, orderBy('timestamp', 'desc'), limit(10));
-	// const unsub = onSnapshot(q, (docs) =>
-	// 	store.set(
-	// 		docs.docs.map((d) =>
-	// 			d.metadata.hasPendingWrites
-	// 				? {
-	// 						...(<Message>d.data()),
-	// 						timestamp: Timestamp.now()
-	// 				  }
-	// 				: <Message>d.data()
-	// 		)
-	// 	)
-	// );
+	const store = writable<Message[] | undefined>(undefined);
+
+	supabase
+		.from('shoutbox')
+		.select('*')
+		.limit(LIMIT)
+		.then((res) => store.set(res.data ?? []));
+
+	const channel = supabase
+		.channel('schema-db-changes')
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public',
+				table: 'shoutbox'
+			},
+			(payload) => store.update((old) => [...old!.splice(-LIMIT + 1)!, <Message>payload.new])
+		)
+		.subscribe();
 	return store;
 }
 
-export async function addToShoutbox(message: string, user: any) {
-	// await addDoc(shoutboxCollection, {
-	// 	message,
-	// 	username: user.login,
-	// 	timestamp: serverTimestamp()
-	// });
+export async function addToShoutbox(message: string) {
+	await supabase.rpc('shout', {
+		message
+	});
 }

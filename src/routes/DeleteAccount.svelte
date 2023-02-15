@@ -1,14 +1,11 @@
 <script lang="ts">
-	import { auth, reloadUserdata } from '$lib/firebase.client';
+	import { invalidate } from '$app/navigation';
+	import { supabase } from '$lib/supabase';
 
 	async function deleteAccount() {
 		if (!confirm('Are you sure you want to delete your account?')) return;
-		await fetch('/delete-account', {
-			method: 'POST',
-			body: JSON.stringify({ idToken: await auth.currentUser?.getIdToken() })
-		});
-		await auth.currentUser?.reload();
-		reloadUserdata();
+		await supabase.rpc('deleteUser');
+		await supabase.auth.signOut();
 	}
 </script>
 

@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { GithubAuthProvider, signInWithRedirect } from 'firebase/auth';
-	import { auth } from '$lib/firebase.client';
+	import { supabase } from '$lib/supabase';
 
-	const provider = new GithubAuthProvider();
+	async function signInWithGitHub() {
+		const { data, error } = await supabase.auth.signInWithOAuth({
+			provider: 'github'
+		});
+	}
 </script>
 
-<button on:click={() => signInWithRedirect(auth, provider)}>Sign in with GitHub</button>
+<button on:click={signInWithGitHub}>Sign in with GitHub</button>
