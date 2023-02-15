@@ -9,7 +9,7 @@ language sql
 security definer
 as $$
 	insert into shoutbox (sender, message)
-	select raw_user_meta_data -> 'user_name', message
+	select raw_user_meta_data ->> 'user_name', message
 	from auth.users
   	where id = auth.uid();
 $$;
