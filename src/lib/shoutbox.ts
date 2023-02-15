@@ -18,20 +18,23 @@ export function getShoutbox() {
 		.select('*')
 		.order('created_at', { ascending: false })
 		.limit(LIMIT)
-		.then((res) => store.set(res.data ?? []));
+		.then((res) => {
+			store.set(res.data ?? []);
 
-	const channel = supabase
-		.channel('schema-db-changes')
-		.on(
-			'postgres_changes',
-			{
-				event: '*',
-				schema: 'public',
-				table: 'shoutbox'
-			},
-			(payload) => store.update((old) => [<Message>payload.new, ...old!.splice(-LIMIT + 1)!])
-		)
-		.subscribe();
+			const channel = supabase
+				.channel('schema-db-changes')
+				.on(
+					'postgres_changes',
+					{
+						event: '*',
+						schema: 'public',
+						table: 'shoutbox'
+					},
+					(payload) => store.update((old) => [<Message>payload.new, ...old!.splice(-LIMIT + 1)!])
+				)
+				.subscribe();
+		});
+
 	return store;
 }
 
